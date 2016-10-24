@@ -1,2 +1,2 @@
 # imdb-python-webapp
-A movie review website wirted by python.
+A movie review website writed by python.
