@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-__author__ = 'Alex Wang'
+__author__ = 'Michael Liao'
 
 '''
 A simple, lightweight, WSGI-compatible web framework.
