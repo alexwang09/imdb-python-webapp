@@ -1,0 +1,30 @@
+/*
+ * custom css
+ */
+a:hover, a:active {
+    text-decoration: none;
+}
+
+.ghost {
+    color: #D8D8D8;
+}
+
+h4 {
+    margin : 10px 0px 5px 0px;
+}
+
+img {
+    margin-top: 10px;
+}
+
+.subtitle {
+    margin: 0px 0px 8px 0px;
+}
+
+.uk-width-medium-3-4{
+    color: #6E6E6E;
+}
+
+.num_review {
+    color: #8258FA;
+}

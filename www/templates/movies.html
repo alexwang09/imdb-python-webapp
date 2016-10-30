@@ -1,0 +1,84 @@
+{% extends '__base__.html' %}
+
+{% block title %}日志{% endblock %}
+
+{% block beforehead %}
+
+<script>
+</script>
+
+{% endblock %}
+
+{% block content %}
+
+    {% set i = 0 %}
+
+    <div class="uk-width-medium-3-4">
+    {% for movie in movies %}
+        <div class="uk-grid uk-grid-small uk-container uk-container-center" style="background-color:{% if i%2==0 %}#F2F2F2;{% else %}#FAFAFA;{% endif %}margin-top:3px;">
+        {% set i=i+1 %}
+            <div class="uk-width-medium-1-4 uk-margin-remove">
+                <img alt="{{ movie.name }} ({{ movie.year }}) Poster" title="" src="/static/images/{{ movie.name }} ({{ movie.year }}).jpg"/>
+            </div>
+            <div class="uk-width-medium-3-4">
+                    <h4><a href="/">{{ movie.name }} ({{ movie.year }})</a></h4>
+                <p class="subtitle">{{ movie.duration }} min<span>&nbsp&nbsp&nbsp-&nbsp&nbsp&nbsp</span>
+                {% for style in movie.styles %}
+                    <span>{{ style }}</span>
+                    {% if style != movie.styles[movie.num_styles - 1] %}
+                    <span class="ghost">&nbsp|&nbsp</span>
+                    {% endif %}
+                {% endfor %}
+                </p>
+                <div >
+                    <p>Score:&nbsp&nbsp<strong>{{ movie.score }}</strong>/100<span class="num_review">&nbsp&nbsp({{ movie.num_review }} 人评价)</span></p>
+                </div>
+                <div>
+                    <p>{{ movie.summary }}</p>
+                </div>
+                    <strong>导演:</strong>&nbsp&nbsp
+                    {% for director in movie.directors %}
+                        <span>{{ director }}</span>
+                        {% if director != movie.directors[movie.num_directors - 1] %}
+                        <span>,&nbsp</span>
+                        {% endif %}
+                    {% endfor %}
+                    <br>
+                    <strong>主演:</strong>&nbsp&nbsp
+                    {% for star in movie.stars %}
+                        <span>{{ star }}</span>
+                        {% if star != movie.stars[movie.num_stars - 1] %}
+                        <span>,&nbsp</span>
+                        {% endif %}
+                    {% endfor %}
+            </div>
+        </div>
+    {% endfor %}
+
+        <ul class="uk-pagination">
+        {% if page.has_previous %}
+            <li><a href="/?page={{ page.page_index - 1 }}"><i class="uk-icon-angle-double-left"></i></a></li>
+        {% else %}
+            <li class="uk-disabled"><span><i class="uk-icon-angle-double-left"></i></span></li>
+        {% endif %}
+            <li class="uk-active"><span>{{ page.page_index }}</span></li>
+        {% if page.has_next %}
+            <li><a href="/?page={{ page.page_index + 1 }}"><i class="uk-icon-angle-double-right"></i></a></li>
+        {% else %}
+            <li class="uk-disabled"><span><i class="uk-icon-angle-double-right"></i></span></li>
+        {% endif %}
+        </ul>
+    </div>
+
+    <div class="uk-width-medium-1-4">
+        <div class="uk-panel uk-panel-header">
+            <h3 class="uk-panel-title">友情链接</h3>
+            <ul class="uk-list uk-list-line">
+                <li><i class="uk-icon-thumbs-o-up"></i> <a target="_blank" href="https://www.douban.com/">豆瓣</a></li>
+                <li><i class="uk-icon-thumbs-o-up"></i> <a target="_blank" href="http://www.zhihu.com/">知乎</a></li>
+                <li><i class="uk-icon-thumbs-o-up"></i> <a target="_blank" href="http://blog.csdn.net/">csdn</a></li>
+            </ul>
+        </div>
+    </div>
+
+{% endblock %}
