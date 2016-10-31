@@ -13,9 +13,9 @@
 
     {% set i = 0 %}
 
-    <div class="uk-width-medium-3-4">
+    <div class="uk-width-medium-3-4 main">
     {% for movie in movies %}
-        <div class="uk-grid uk-grid-small uk-container uk-container-center" style="background-color:{% if i%2==0 %}#F2F2F2;{% else %}#FAFAFA;{% endif %}margin-top:3px;">
+        <div class="uk-grid uk-grid-small uk-container uk-container-center movie" style="background-color:{% if i%2==0 %}#F2F2F2;{% else %}#FAFAFA;{% endif %}margin-top:3px;">
         {% set i=i+1 %}
             <div class="uk-width-medium-1-4 uk-margin-remove">
                 <img alt="{{ movie.name }} ({{ movie.year }}) Poster" title="" src="/static/images/{{ movie.name }} ({{ movie.year }}).jpg"/>
@@ -34,7 +34,10 @@
                     <p>Score:&nbsp&nbsp<strong>{{ movie.score }}</strong>/100<span class="num_review">&nbsp&nbsp({{ movie.num_review }} 人评价)</span></p>
                 </div>
                 <div>
-                    <p>{{ movie.summary }}</p>
+                {% for summary in movie.summarys %}
+                    {{ summary }}<br>
+                {% endfor %}
+                <br>
                 </div>
                     <strong>导演:</strong>&nbsp&nbsp
                     {% for director in movie.directors %}
@@ -45,11 +48,15 @@
                     {% endfor %}
                     <br>
                     <strong>主演:</strong>&nbsp&nbsp
+                    {% set starnum = 0 %}
                     {% for star in movie.stars %}
+                    {% if starnum < 4 %}
+                    {% set starnum = starnum + 1 %}
                         <span>{{ star }}</span>
-                        {% if star != movie.stars[movie.num_stars - 1] %}
+                        {% if star != movie.stars[movie.num_stars - 1] and star !=movie.stars[3] %}
                         <span>,&nbsp</span>
                         {% endif %}
+                    {% endif %}
                     {% endfor %}
             </div>
         </div>
