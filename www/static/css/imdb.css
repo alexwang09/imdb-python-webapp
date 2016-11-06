@@ -1,6 +1,10 @@
 /*
  * custom css
  */
+ #star {
+     margin-bottom: 20px;
+ }
+
 a:hover, a:active {
     text-decoration: none;
 }
@@ -10,7 +14,7 @@ a:hover, a:active {
 }
 
 h4 {
-    margin : 10px 0px 5px 0px;
+    margin: 10px 0px 5px 0px;
 }
 
 img {
@@ -40,4 +44,12 @@ img {
     padding-left: 10px;
     padding-right: 10px;
     padding-top: 10px;
+}
+
+.comment_avatar {
+    margin-top: 0px;
+}
+
+.font_lighter {
+    color: #BDBDBD;
 }

@@ -38,7 +38,7 @@ class Movie(Model):
     date = StringField(ddl='varchar(50)')
     director = StringField(ddl='varchar(50)')
     writer = StringField(ddl='varchar(50)')
-    star = StringField(ddl='varchar(500)')
+    star = StringField(ddl='varchar(200)')
     created_at = FloatField(updatable=False, default=time.time)
 
 class Review(Model):
@@ -50,4 +50,4 @@ class Review(Model):
     user_name = StringField(ddl='varchar(50)')
     score = IntegerField()
     content = TextField()
-    created_at = FloatField(updatable=False, default=time.time)
+    created_at = FloatField(default=time.time)

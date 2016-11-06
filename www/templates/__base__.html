@@ -12,11 +12,23 @@
     <link rel="stylesheet" href="/static/css/uikit.gradient.min.css">
     <link rel="stylesheet" href="/static/css/imdb.css" />
     <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/jquery.raty.min.js"></script>
     <script src="/static/js/md5.js"></script>
     <script src="/static/js/uikit.min.js"></script>
     <script src="/static/js/sticky.min.js"></script>
     <script src="/static/js/vue.min.js"></script>
     <script src="/static/js/awesome.js"></script>
+    <script>
+    $(function () {
+        $('#form-search').submit(function (e) {
+            e.preventDefault();
+            var kw = $('#form-search input').val().trim();
+            if (kw) {
+                location.assign('/movies/search?kw=' + kw);
+            }
+        });
+    });
+    </script>
     {% block beforehead %}<!-- before head  -->{% endblock %}
 </head>
 <body>
@@ -24,7 +36,7 @@
         <div class="uk-container uk-container-center">
             <a href="/" class="uk-navbar-brand">IMDb</a>
             <div class="uk-navbar-content uk-hidden-small">
-                <form class="uk-form uk-margin-remove uk-display-inline-block">
+                <form id="form-search" class="uk-form uk-margin-remove uk-display-inline-block">
                     <input type="text" style="width:300px" placeholder="查询电影...">
                     <button class="uk-icon-search uk-button uk-button-primary" type="submit"></button>
                 </form>

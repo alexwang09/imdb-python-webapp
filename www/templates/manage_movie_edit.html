@@ -1,0 +1,146 @@
+{% extends '__base__.html' %}
+
+{% block title %}编辑电影{% endblock %}
+
+{% block beforehead %}
+
+<script>
+
+var
+    action = '{{ action }}',
+    redirect = '{{ redirect }}';
+
+//mvvm的双向绑定可能与搜狗输入法有冲突
+var vm;
+function initVue(movie) {
+    vm = new Vue({
+        el: '#form-movie',
+        data: movie,
+        methods: {
+            submit: function (event) {
+                event.preventDefault();
+                startLoading();
+                postApi(action, this.$data, function (err, r) {
+                    if (err) {
+                        showError(err);
+                    }
+                    else {
+                        return location.assign(redirect);
+                    }
+                    stopLoading();
+                });
+            },
+            cancel: function() {
+                location.assign(redirect);
+            }
+        }
+    });
+}
+//  以下{}中内容并非注释
+// {% if id %}
+
+$(function () {
+    startLoading();
+    getApi('/api/movies/{{ id }}', function (err, movie) {
+        if (err) {
+            showError(err);
+        }
+        else {
+            stopLoading();
+            initVue(movie);
+        }
+    });
+});
+
+// {% else %}
+
+$(function () {
+    initVue({
+        name: '',
+        duration: '',
+        style: '',
+        date: '',
+        director: '',
+        writer: '',
+        star: '',
+        summary: '',
+    });
+});
+
+// {% endif %}
+
+</script>
+
+{% endblock %}
+
+{% block content %}
+
+    <div class="uk-width-1-1 uk-margin-bottom">
+        <div class="uk-panel uk-panel-box">
+            <ul class="uk-breadcrumb">
+                <li><a href="/manage/reviews">评论</a></li>
+                <li><a href="/manage/movies">电影</a></li>
+                <li><a href="/manage/users">用户</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="uk-width-2-3">
+        <form id="form-movie" v-on="submit: submit" class="uk-form uk-form-stacked">
+            <div class="uk-alert uk-alert-danger uk-hidden"></div>
+            <div class="uk-form-row">
+                <label class="uk-form-label">电影名:</label>
+                <div class="uk-form-controls">
+                    <input v-model="name" name="name" type="text" placeholder="电影名" class="uk-width-1-1">
+                </div>
+            </div>
+            <div class="uk-form-row">
+                <label class="uk-form-label">时长:</label>
+                <div class="uk-form-controls">
+                    <input v-model="duration" name="duration" type="text" placeholder="时长(分钟)" class="uk-width-1-1">
+                </div>
+            </div>
+            <div class="uk-form-row">
+                <label class="uk-form-label">类型:</label>
+                <div class="uk-form-controls">
+                    <input v-model="style" name="style" type="text" placeholder="(类型之间以分号隔开)" class="uk-width-1-1">
+                </div>
+            </div>
+            <div class="uk-form-row">
+                <label class="uk-form-label">上映日期:</label>
+                <div class="uk-form-controls">
+                    <input v-model="date" name="date" type="text" placeholder="如:20160101" class="uk-width-1-1">
+                </div>
+            </div>
+            <div class="uk-form-row">
+                <label class="uk-form-label">导演:</label>
+                <div class="uk-form-controls">
+                    <textarea v-model="director" rows="2" name="director" placeholder="(导演名之间以分号隔开)" class="uk-width-1-1" style="resize:none;"></textarea>
+                </div>
+            </div>
+            <div class="uk-form-row">
+                <label class="uk-form-label">编剧:</label>
+                <div class="uk-form-controls">
+                    <textarea v-model="writer" rows="2" name="writer" placeholder="(编剧名之间以分号隔开)" class="uk-width-1-1" style="resize:none;"></textarea>
+                </div>
+            </div>
+            <div class="uk-form-row">
+                <label class="uk-form-label">主演:</label>
+                <div class="uk-form-controls">
+                    <textarea v-model="star" rows="4" name="star" placeholder="(主演名之间以分号隔开)" class="uk-width-1-1" style="resize:none;"></textarea>
+                </div>
+            </div>
+            <div class="uk-form-row">
+                <label class="uk-form-label">剧情简介:</label>
+                <div class="uk-form-controls">
+                    <textarea v-model="summary" rows="16" name="summary" placeholder="剧情简介" class="uk-width-1-1" style="resize:none;"></textarea>
+                </div>
+            </div>
+            <div class="uk-form-row">
+                <button type="submit" class="uk-button uk-button-primary"><i class="uk-icon-save"></i> 保存</button>
+                <button v-on="click: cancel()" type="button" class="uk-button"><i class="uk-icon-times"></i> 取消</button>
+            </div>
+        </form>
+    </div>
+
+{% endblock %}

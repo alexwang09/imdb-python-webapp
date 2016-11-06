@@ -13,7 +13,7 @@
 
     {% set i = 0 %}
 
-    <div class="uk-width-medium-3-4 main">
+    <div id="div-movies" class="uk-width-medium-3-4 main">
     {% for movie in movies %}
         <div class="uk-grid uk-grid-small uk-container uk-container-center movie" style="background-color:{% if i%2==0 %}#F2F2F2;{% else %}#FAFAFA;{% endif %}margin-top:3px;">
         {% set i=i+1 %}
@@ -60,17 +60,19 @@
                     {% endfor %}
             </div>
         </div>
+    {% else %}
+        <p>很遗憾,没有找到这部电影!</p>
     {% endfor %}
 
         <ul class="uk-pagination">
         {% if page.has_previous %}
-            <li><a href="/?page={{ page.page_index - 1 }}"><i class="uk-icon-angle-double-left"></i></a></li>
+            <li><a href="/movies/search?kw={{ kw }}&page={{ page.page_index - 1 }}"><i class="uk-icon-angle-double-left"></i></a></li>
         {% else %}
             <li class="uk-disabled"><span><i class="uk-icon-angle-double-left"></i></span></li>
         {% endif %}
             <li class="uk-active"><span>{{ page.page_index }}</span></li>
         {% if page.has_next %}
-            <li><a href="/?page={{ page.page_index + 1 }}"><i class="uk-icon-angle-double-right"></i></a></li>
+            <li><a href="/movies/search?kw={{ kw }}&page={{ page.page_index + 1 }}"><i class="uk-icon-angle-double-right"></i></a></li>
         {% else %}
             <li class="uk-disabled"><span><i class="uk-icon-angle-double-right"></i></span></li>
         {% endif %}

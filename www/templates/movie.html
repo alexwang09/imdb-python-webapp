@@ -1,0 +1,168 @@
+{% extends '__base__.html' %}
+
+{% block title %}{{ movie.name }}{% endblock %}
+
+{% block beforehead %}
+
+<script>
+
+var comment_url = '/api/movies/{{ movie.id }}/reviews';
+
+$(function () {
+    $('#star').raty({
+        score: function() {
+            return $(this).attr('data-rating');
+        },
+        hints: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
+        path:"/static/images/star",
+        starOff: 'star-off-big.png',
+        starOn: 'star-on-big.png',
+        size: 24,
+        number: 10,
+        });
+    $('#form-review').submit(function (e) {
+        e.preventDefault();
+        showError();
+        var score = $('#star').raty('score');
+        if(!score){
+            return showError('请评分!');
+        }
+        var content = $('#form-review textarea').val().trim();
+        startLoading();
+        postApi(comment_url, {score: score, content: content}, function (err, result) {
+            if (err) {
+                showError(err);
+                stopLoading();
+                return;
+            }
+            location.reload();
+        });
+    });
+});
+</script>
+
+{% endblock %}
+
+{% block content %}
+
+    <div class="uk-width-medium-3-4">
+            <div class="uk-grid uk-grid-small uk-container uk-container-center movie" style="background-color:#FAFAFA;margin-top:3px;">
+                <div class="uk-width-medium-1-4 uk-margin-remove">
+                    <img alt="{{ movie.name }} ({{ movie.year }}) Poster" title="" src="/static/images/{{ movie.name }} ({{ movie.year }}).jpg"/>
+                </div>
+                <div class="uk-width-medium-3-4">
+                        <h4><a href="/">{{ movie.name }} ({{ movie.year }})</a></h4>
+                    <p class="subtitle">{{ movie.duration }} min<span>&nbsp&nbsp&nbsp-&nbsp&nbsp&nbsp</span>
+                    {% for style in movie.styles %}
+                        <span>{{ style }}</span>
+                        {% if style != movie.styles[movie.num_styles - 1] %}
+                        <span class="ghost">&nbsp|&nbsp</span>
+                        {% endif %}
+                    {% endfor %}
+                    </p>
+                    <div >
+                        <p>Score:&nbsp&nbsp<strong>{{ movie.score }}</strong><span class='font_lighter'>/100<span><span class="num_review">&nbsp&nbsp({{ movie.num_review }} 人评价)</span></p>
+                    </div>
+                    <div>
+                    {% for summary in movie.summarys %}
+                        {{ summary }}<br>
+                    {% endfor %}
+                    <br>
+                    </div>
+                        <strong>导演:</strong>&nbsp&nbsp
+                        {% for director in movie.directors %}
+                            <span>{{ director }}</span>
+                            {% if director != movie.directors[movie.num_directors - 1] %}
+                            <span>,&nbsp</span>
+                            {% endif %}
+                        {% endfor %}
+                        <br>
+                        <strong>编剧:</strong>&nbsp&nbsp
+                        {% for writer in movie.writers %}
+                            <span>{{ writer }}</span>
+                            {% if writer != movie.writers[movie.num_writers - 1] %}
+                            <span>,&nbsp</span>
+                            {% endif %}
+                        {% endfor %}
+                        <br>
+                        <strong>主演:</strong>&nbsp&nbsp
+                        {% set starnum = 0 %}
+                        {% for star in movie.stars %}
+                        {% if starnum < 4 %}
+                        {% set starnum = starnum + 1 %}
+                            <span>{{ star }}</span>
+                            {% if star != movie.stars[movie.num_stars - 1] and star !=movie.stars[3] %}
+                            <span>,&nbsp</span>
+                            {% endif %}
+                        {% endif %}
+                        {% endfor %}
+                </div>
+            </div>
+
+        <hr class="uk-article-divider">
+
+    {% if user %}
+        <h3>发表评论</h3>
+
+        <article class="uk-comment">
+            <header class="uk-comment-header">
+                <img class="uk-comment-avatar comment_avatar" src="/static/images/placeholder_avatar.jpg" width="50" height="50" alt="">
+                <h4 class="uk-comment-title">{{ user.name }}</h4>
+            </header>
+            <div class="uk-comment-body">
+                <form id="form-review" class="uk-form">
+                    <div class="uk-alert uk-alert-danger uk-hidden"></div>
+                    <strong>评分:</strong>
+                    <div id="star" {% if user_review.score %}data-rating="{{ user_review.score/10 }}"{% endif %}></div>
+                    <div class="uk-form-row">
+                        <textarea rows="6" placeholder="说点什么吧" style="width:100%;resize:none;">{% if user_review.content %}{{ user_review.content }}{% endif %}</textarea>
+                    </div>
+                    <div class="uk-form-row">
+                        <button type="submit" class="uk-button uk-button-primary"><i class="uk-icon-comment"></i> 发表评论</button>
+                    </div>
+                </form>
+            </div>
+        </article>
+
+        <hr class="uk-article-divider">
+    {% endif %}
+
+        <h3>最新评论</h3>
+
+        <ul class="uk-comment-list">
+        {% for review in reviews %}
+            {% if review.content %}
+                <li>
+                    <article class="uk-comment">
+                        <header class="uk-comment-header">
+                            <img class="uk-comment-avatar comment_avatar" width="50" height="50" src="/static/images/placeholder_avatar.jpg">
+                            <h4 class="uk-comment-title">{{ review.user_name }} {% if review.user_id==movie.user_id %}(作者){% endif %}</h4>
+                            <p class="uk-comment-meta">{{ review.created_at|datetime }}</p>
+                        </header>
+                        <div class="uk-comment-body">
+                            <p>{{ review.content }}</p>
+                        </div>
+                    </article>
+                </li>
+
+                <hr class="uk-article-divider">
+            {% endif %}
+            {% else %}
+                <p>还没有人评论...</p>
+            {% endfor %}
+        </ul>
+
+    </div>
+
+    <div class="uk-width-medium-1-4">
+        <div class="uk-panel uk-panel-header">
+            <h3 class="uk-panel-title">友情链接</h3>
+            <ul class="uk-list uk-list-line">
+                <li><i class="uk-icon-thumbs-o-up"></i> <a target="_blank" href="https://www.douban.com/">豆瓣</a></li>
+                <li><i class="uk-icon-thumbs-o-up"></i> <a target="_blank" href="http://www.zhihu.com/">知乎</a></li>
+                <li><i class="uk-icon-thumbs-o-up"></i> <a target="_blank" href="http://blog.csdn.net/">csdn</a></li>
+            </ul>
+        </div>
+    </div>
+
+{% endblock %}

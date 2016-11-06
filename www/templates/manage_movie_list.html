@@ -1,16 +1,16 @@
 {% extends '__base__.html' %}
 
-{% block title %}评论{% endblock %}
+{% block title %}电影{% endblock %}
 
 {% block beforehead %}
 
 <script>
 function initVM(data) {
-    $('#div-reviews').show();
+    $('#div-movies').show();
     var vm = new Vue({
-        el: '#div-reviews',
+        el: '#div-movies',
         data: {
-            reviews: data.reviews,
+            movies: data.movies,
             page: data.page
         },
         methods: {
@@ -20,10 +20,12 @@ function initVM(data) {
             next: function () {
                 gotoPage(this.page.page_index + 1);
             },
-            delete_review: function (review) {
-                var content = review.content.length > 20 ? review.content.substring(0, 20) + '...' : review.content;
-                showConfirm('确认删除？', '确认要删除评论“' + review.content + '”？删除后不可恢复！', function () {
-                    postApi('/api/reviews/' + review.id + '/delete', {}, function (err, r) {
+            edit_movie: function (movie) {
+                location.assign('/manage/movies/edit/' + movie.id);
+            },
+            delete_movie: function (movie) {
+                showConfirm('确认删除？', '确认要删除“' + movie.name + '”？删除后不可恢复！', function () {
+                    postApi('/api/movies/' + movie.id + '/delete', {}, function (err, r) {
                         if (err) {
                             return showError(err);
                         }
@@ -35,7 +37,7 @@ function initVM(data) {
     });
 }
 $(function() {
-    getApi('/api/reviews?page={{ page_index }}', function (err, results) {
+    getApi('/api/movies?page={{ page_index }}', function (err, results) {
         if (err) {
             return showError(err);
         }
@@ -52,40 +54,43 @@ $(function() {
     <div class="uk-width-1-1 uk-margin-bottom">
         <div class="uk-panel uk-panel-box">
             <ul class="uk-breadcrumb">
-                <li class="uk-active"><span>评论</span></li>
-                <li><a href="/manage/movies">电影</a></li>
+                <li><a href="/manage/reviews">评论</a></li>
+                <li class="uk-active"><span>电影</span></li>
                 <li><a href="/manage/users">用户</a></li>
             </ul>
         </div>
     </div>
 
-    <div class="uk-width-1-1">
+    <div class="uk-width-1-1 uk-margin-bottom">
         <div class="uk-alert uk-alert-danger uk-hidden"></div>
     </div>
 
-    <div id="div-reviews" class="uk-width-1-1" style="display:none">
+    <div id="div-movies" class="uk-width-1-1" style="display:none">
+        <a href="/manage/movies/create" class="uk-button uk-button-primary"><i class="uk-icon-plus"></i> 新电影</a>
+
         <table class="uk-table uk-table-hover">
             <thead>
                 <tr>
-                    <th class="uk-width-2-10">作者</th>
-                    <th class="uk-width-5-10">内容</th>
-                    <th class="uk-width-2-10">创建时间</th>
+                    <th class="uk-width-4-10">电影名</th>
+                    <th class="uk-width-3-10">导演</th>
+                    <th class="uk-width-2-10">添加时间</th>
                     <th class="uk-width-1-10">操作</th>
                 </tr>
             </thead>
             <tbody>
-                <tr v-repeat="review: reviews" >
+                <tr v-repeat="movie: movies" >
                     <td>
-                        <span v-text="review.user_name"></span>
+                        <a target="_blank" v-attr="href: '/movie/'+movie.id" v-text="movie.name"></a>
                     </td>
                     <td>
-                        <span v-text="review.content"></span>
+                        <span v-text="movie.directors[0]"></span>
                     </td>
                     <td>
-                        <span v-text="review.created_at.toDateTime()"></span>
+                        <span v-text="movie.created_at.toDateTime()"></span>
                     </td>
                     <td>
-                        <a href="#0" v-on="click: delete_review(review)"><i class="uk-icon-trash-o"></i>
+                        <a href="#0" v-on="click: edit_movie(movie)"><i class="uk-icon-edit"></i>
+                        <a href="#0" v-on="click: delete_movie(movie)"><i class="uk-icon-trash-o"></i>
                     </td>
                 </tr>
             </tbody>
