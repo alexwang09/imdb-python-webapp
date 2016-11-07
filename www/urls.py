@@ -7,10 +7,12 @@ import os, re, time, base64, hashlib, logging
 
 import markdown2
 
+from datetime import datetime
+
 from transwarp.web import get, post, ctx, view, interceptor, seeother, notfound
 
 from apis import api, Page, APIError, APIValueError, APIPermissionError, APIResourceNotFoundError
-from models import User, Movie, Review
+from models import User, Movie, Review, History
 from config import configs
 
 _COOKIE_NAME = 'imdbsession'
@@ -42,6 +44,20 @@ def _search_movies_by_page(kw):
     sql = sql %(kw, page.offset, page.limit)
     movies = Movie.find_by(sql)
     return movies, page
+
+def _get_movie_details(movie):
+    movie.year = movie.date[0:4]
+    movie.directors = movie.director.split(' ')
+    movie.writers = movie.writer.split(' ')
+    movie.stars = movie.star.split(' ')
+    movie.styles = movie.style.split(' ')
+    movie.summarys = movie.summary.split("\n")
+    movie.num_directors = len(movie.directors)
+    movie.num_writers = len(movie.writers)
+    movie.num_stars = len(movie.stars)
+    movie.num_styles = len(movie.styles)
+    movie.score = int(movie.score)
+    return movie
 
 def make_signed_cookie(id, password, max_age):
     # build cookie string by: id-expires-md5
@@ -97,18 +113,24 @@ def manage_interceptor(next):
 def index():
     movies, page = _get_movies_by_page()
     for movie in movies:
-        movie.year = movie.date[0:4]
-        movie.directors = movie.director.split(' ')
-        movie.writers = movie.writer.split(' ')
-        movie.stars = movie.star.split(' ')
-        movie.styles = movie.style.split(' ')
-        movie.summarys = movie.summary.split("\n")
-        movie.num_directors = len(movie.directors)
-        movie.num_writers = len(movie.writers)
-        movie.num_stars = len(movie.stars)
-        movie.num_styles = len(movie.styles)
-        movie.score = int(movie.score)
+        movie = _get_movie_details(movie)
     return dict(page=page, movies=movies, user=ctx.request.user)
+
+@view('index.html')
+@get('/search_tag')
+def _get_index_by_tags():
+    tag = ctx.request.get('tag','')
+    sql = "where style like '%%%s%%' "
+    sql = sql %(tag)
+    movies = Movie.find_by(sql)
+    total = len(movies)
+    page = Page(total, _get_page_index())
+    sql = "where style like '%%%s%%' order by created_at desc limit %s,%s"
+    sql = sql %(tag, page.offset, page.limit)
+    movies = Movie.find_by(sql)
+    for movie in movies:
+        movie = _get_movie_details(movie)
+    return dict(movies=movies, tag=tag, page=page, user=ctx.request.user)
 
 @view('register.html')
 @get('/register')
@@ -119,6 +141,11 @@ def register():
 @get('/signin')
 def signin():
     return dict()
+
+@view('mypath.html')
+@get('/mypath')
+def mypath():
+    return dict(user=ctx.request.user)
 
 @get('/signout')
 def signout():
@@ -170,17 +197,7 @@ def search_movies():
         return APIValueError('kw')
     movies, page = _search_movies_by_page(kw)
     for movie in movies:
-        movie.year = movie.date[0:4]
-        movie.directors = movie.director.split(' ')
-        movie.writers = movie.writer.split(' ')
-        movie.stars = movie.star.split(' ')
-        movie.styles = movie.style.split(' ')
-        movie.summarys = movie.summary.split("\n")
-        movie.num_directors = len(movie.directors)
-        movie.num_writers = len(movie.writers)
-        movie.num_stars = len(movie.stars)
-        movie.num_styles = len(movie.styles)
-        movie.score = int(movie.score)
+        movie = _get_movie_details(movie)
     return dict(movies=movies, page=page, kw=kw, user=ctx.request.user)
 
 @view('movie.html')
@@ -188,22 +205,22 @@ def search_movies():
 def movie(movie_id):
     user = ctx.request.user
     movie = Movie.get(movie_id)
-    movie.year = movie.date[0:4]
-    movie.directors = movie.director.split(' ')
-    movie.writers = movie.writer.split(' ')
-    movie.stars = movie.star.split(' ')
-    movie.styles = movie.style.split(' ')
-    movie.summarys = movie.summary.split("\n")
-    movie.num_directors = len(movie.directors)
-    movie.num_writers = len(movie.writers)
-    movie.num_stars = len(movie.stars)
-    movie.num_styles = len(movie.styles)
-    movie.score = int(movie.score)
+    movie = _get_movie_details(movie)
     if movie is None:
         raise notfound()
     movie.html_summary = markdown2.markdown(movie.summary)
+    if user:
+        history = History.find_first('where user_id=? and movie_id=?', user.id, movie_id)
+        if not history:
+            history = History(user_id=user.id, movie_id=movie_id)
+            history.insert()
+        else:
+            history.created_at = time.time()
+            history.update()
     reviews = Review.find_by('where movie_id=? order by created_at desc limit 1000', movie_id)
-    user_review = Review.find_first('where user_id=? and movie_id=?', user.id, movie_id)
+    user_review = ''
+    if user:
+        user_review = Review.find_first('where user_id=? and movie_id=?', user.id, movie_id)
     return dict(movie=movie, reviews=reviews, user=user, user_review=user_review)
 
 @api
@@ -243,6 +260,25 @@ def api_get_reviews():
     page = Page(total, _get_page_index())
     reviews = Review.find_by('order by created_at desc limit ?,?', page.offset, page.limit)
     return dict(reviews=reviews, page=page)
+
+@api
+@get('/api/histories/:user_id')
+def api_get_histories(user_id):
+    if not user_id:
+        return APIValueError('users')
+    histories = History.find_by('where user_id=? order by created_at desc', user_id)
+    movies = []
+    if histories:
+        for history in histories:
+            movie_id = history.movie_id
+            movie = Movie.get(movie_id)
+            movie = _get_movie_details(movie)
+            dt = datetime.fromtimestamp(history.created_at)
+            movie.history_day = dt.day
+            movie.history_month = dt.month
+            movies.append(movie)
+        return dict(movies=movies)
+    raise APIResourceNotFoundError('histories')
 
 @api
 @post('/api/users')
@@ -362,7 +398,7 @@ def api_create_movie_review(movie_id):
         raise APIValueError('score')
     if not content:
         content = ''
-    review = Review.find_first('where user_id=?', user.id)
+    review = Review.find_first('where user_id=? and movie_id=?', user.id, movie_id)
     if review:
         movie.score = (movie.score * movie.num_review - review.score + score) / movie.num_review
         movie.update()

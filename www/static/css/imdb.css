@@ -53,3 +53,65 @@ img {
 .font_lighter {
     color: #BDBDBD;
 }
+
+#fliter {
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+#fliter span {
+    text-align: center;
+    display:inline-block;
+    font-size: 20px;
+    width: 65px;
+    height: 30px;
+    padding-top: 5px;
+}
+
+#fliter span:hover {
+    background-color: #E6E6E6;
+}
+
+#fliter a {
+    color: #6E6E6E;
+}
+
+#fliter a:active {
+    color: white;
+}
+
+.newmovies {
+    font-size: 15px;
+    color: blue;
+}
+
+.clickClass {
+    background-color: #5882FA;
+}
+
+#fliter .clickClass a {
+    color: white;
+}
+
+.history-movie {
+    display: inline-block;
+    padding-bottom: 20px;
+}
+
+.history-movie img {
+    width: 200px;
+    height: 250px;
+}
+.history-detail {
+    padding-top: 10px;
+}
+
+.history-score {
+    color: #FFA500;
+}
+
+.history-date {
+    font-size: 20px;
+}

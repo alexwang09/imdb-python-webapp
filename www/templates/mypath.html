@@ -1,0 +1,55 @@
+{% extends '__base__.html' %}
+
+{% block title %}电影{% endblock %}
+
+{% block beforehead %}
+<script>
+function initVM(movies) {
+    $('#div-movies').show();
+    var vm = new Vue({
+        el: '#div-movies',
+        data: movies,
+        methods: {
+
+        }
+    });
+}
+
+
+$(function() {
+    getApi('/api/histories/{{ user.id }}', function(err, movies) {
+        if (err) {
+            return showError(err);
+        }
+        $('#div-loading').hide();
+        initVM(movies);
+    });
+});
+</script>
+{% endblock %}
+
+{% block content %}
+    <div class="uk-width-1-1 uk-margin-bottom">
+        <div class="uk-panel uk-panel-box">
+            <span>我的浏览历史<span>
+        </div>
+    </div>
+
+    <div class="uk-width-1-1">
+        <div class="uk-alert uk-alert-danger uk-hidden"></div>
+    </div>
+
+    <div id="div-movies" class="uk-width-1-1" style="display:none">
+        <div class="uk-text-center uk-width-1-5 history-movie" v-repeat="movie: movies"  >
+            <div class="history-date">
+                <strong><span v-text="movie.history_month + '.' + movie.history_day "></span><strong>
+            </div>
+            <div>
+                <img v-attr="src: '/static/images/' + movie.name + ' (' + movie.year + ').jpg', alt: movie.name + ' (' + movie.year + ') Poster' " />
+            </div>
+            <div class="history-detail">
+                <a v-attr="href: '/movie/'+movie.id" v-text="movie.name + ' '"></a><span class="history-score" v-text="movie.score"></span>
+            </div>
+        </div>
+    </div>
+{% endblock %}

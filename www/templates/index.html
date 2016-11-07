@@ -5,6 +5,23 @@
 {% block beforehead %}
 
 <script>
+
+$(function() {
+    var tag = $('#fliter input').val();
+    tag_selec = $("[value='"+tag+"']");
+    $('#fliter span :not(tag_selec)').removeClass('clickClass');
+    $(tag_selec).addClass('clickClass');
+    $('#fliter span').click(function() {
+        tag = $(this).text();
+        if (tag == '全部') {
+            location.assign('/');
+        }
+        else{
+            location.assign('/search_tag?tag='+tag);
+        }
+    });
+});
+
 </script>
 
 {% endblock %}
@@ -12,10 +29,22 @@
 {% block content %}
 
     {% set i = 0 %}
-
     <div class="uk-width-medium-3-4 main">
+        <span class='newmovies'><strong>Movies</strong></span>
+        <div id="fliter">
+            <input type="hidden" name="tag_hidden" value="{{ tag }}"/>
+            <span value='全部'><a href="#">全部</a></span>
+            <span value='动作'><a href="#">动作</a></span>
+            <span value='冒险'><a href="#">冒险</a></span>
+            <span value='喜剧'><a href="#">喜剧</a></span>
+            <span value='爱情'><a href="#">爱情</a></span>
+            <span value='剧情'><a href="#">剧情</a></span>
+            <span value='犯罪'><a href="#">犯罪</a></span>
+            <span value='动画'><a href="#">动画</a></span>
+        </div>
+        <hr class="uk-article-divider">
     {% for movie in movies %}
-        <div class="uk-grid uk-grid-small uk-container uk-container-center movie" style="background-color:{% if i%2==0 %}#F2F2F2;{% else %}#FAFAFA;{% endif %}margin-top:3px;">
+        <div class="movie uk-grid uk-grid-small uk-container uk-container-center" style="background-color:{% if i%2==0 %}#F2F2F2;{% else %}#FAFAFA;{% endif %}margin-top:3px;" tag="{% for style in movie.styles %}{{ style }}{% endfor %}">
         {% set i=i+1 %}
             <div class="uk-width-medium-1-4 uk-margin-remove">
                 <a href="/movie/{{ movie.id }}"><img alt="{{ movie.name }} ({{ movie.year }}) Poster" src="/static/images/{{ movie.name }} ({{ movie.year }}).jpg"/></a>
@@ -64,13 +93,13 @@
 
         <ul class="uk-pagination">
         {% if page.has_previous %}
-            <li><a href="/?page={{ page.page_index - 1 }}"><i class="uk-icon-angle-double-left"></i></a></li>
+            <li><a href="/{%if tag%}search_tag?tag={{ tag }}&page={{ page.page_index - 1 }}{% else %}?page={{ page.page_index - 1 }}{% endif %}"><i class="uk-icon-angle-double-left"></i></a></li>
         {% else %}
             <li class="uk-disabled"><span><i class="uk-icon-angle-double-left"></i></span></li>
         {% endif %}
             <li class="uk-active"><span>{{ page.page_index }}</span></li>
         {% if page.has_next %}
-            <li><a href="/?page={{ page.page_index + 1 }}"><i class="uk-icon-angle-double-right"></i></a></li>
+            <li><a href="/{%if tag%}search_tag?tag={{ tag }}&page={{ page.page_index + 1 }}{% else %}?page={{ page.page_index + 1 }}{% endif %}"><i class="uk-icon-angle-double-right"></i></a></li>
         {% else %}
             <li class="uk-disabled"><span><i class="uk-icon-angle-double-right"></i></span></li>
         {% endif %}

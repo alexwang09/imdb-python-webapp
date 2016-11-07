@@ -51,3 +51,11 @@ class Review(Model):
     score = IntegerField()
     content = TextField()
     created_at = FloatField(default=time.time)
+
+class History(Model):
+    __table__ = 'histories'
+
+    id = StringField(primary_key=True, default=next_id, ddl='varchar(50)')
+    user_id = StringField(updatable=False, ddl='varchar(50)')
+    movie_id = StringField(updatable=False, ddl='varchar(50)')
+    created_at = FloatField(default=time.time)

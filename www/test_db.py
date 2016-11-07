@@ -3,7 +3,7 @@
 
 __author__ = 'Alex Wang'
 
-from models import User, Movie, Review
+from models import User, Movie, Review, History
 
 from transwarp import db
 
@@ -12,13 +12,15 @@ if __name__ == '__main__':
     #print Movie().__sql__()
     db.create_engine('root', 'wxy6772102', 'imdb')
 
+    db.update('drop table if exists histories')
+    db.update(History().__sql__())
+    '''
     id = '0014781867782440246055d8b314bb1be953e2843a5af0a000'
     m = Movie.get(id)
 
     m.score = 0
     m.num_review = 0
     m.update()
-    '''
     user_name = 'alex'
     content = 'hello'
 
