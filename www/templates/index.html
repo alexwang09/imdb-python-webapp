@@ -47,7 +47,7 @@ $(function() {
         <div class="movie uk-grid uk-grid-small uk-container uk-container-center" style="background-color:{% if i%2==0 %}#F2F2F2;{% else %}#FAFAFA;{% endif %}margin-top:3px;" tag="{% for style in movie.styles %}{{ style }}{% endfor %}">
         {% set i=i+1 %}
             <div class="uk-width-medium-1-4 uk-margin-remove">
-                <a href="/movie/{{ movie.id }}"><img alt="{{ movie.name }} ({{ movie.year }}) Poster" src="/static/images/{{ movie.name }} ({{ movie.year }}).jpg"/></a>
+                <a href="/movie/{{ movie.id }}"><img alt="{{ movie.name }} ({{ movie.year }}) Poster" src="/static/images/movie_posters/{{ movie.id }}.jpg"/></a>
             </div>
             <div class="uk-width-medium-3-4">
                     <h4><a href="/movie/{{ movie.id }}">{{ movie.name }} ({{ movie.year }})</a></h4>

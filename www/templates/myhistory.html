@@ -41,14 +41,19 @@ $(function() {
 
     <div id="div-movies" class="uk-width-1-1" style="display:none">
         <div class="uk-text-center uk-width-1-5 history-movie" v-repeat="movie: movies"  >
-            <div class="history-date">
-                <strong><span v-text="movie.history_month + '.' + movie.history_day "></span><strong>
+            <div v-if="movie">
+                <div class="history-date">
+                    <strong><span v-text="movie.history_month + '.' + movie.history_day "></span><strong>
+                </div>
+                <div>
+                    <img v-attr="src: '/static/images/movie_posters/' + movie.id + '.jpg', alt: movie.name + ' (' + movie.year + ') Poster' " />
+                </div>
+                <div class="history-detail">
+                    <a v-attr="href: '/movie/'+movie.id" v-text="movie.name + ' '"></a><span class="history-score" v-text="movie.score"></span>
+                </div>
             </div>
-            <div>
-                <img v-attr="src: '/static/images/' + movie.name + ' (' + movie.year + ').jpg', alt: movie.name + ' (' + movie.year + ') Poster' " />
-            </div>
-            <div class="history-detail">
-                <a v-attr="href: '/movie/'+movie.id" v-text="movie.name + ' '"></a><span class="history-score" v-text="movie.score"></span>
+            <div v-if="! movie">
+                该电影已被删除!
             </div>
         </div>
     </div>

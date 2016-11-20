@@ -47,10 +47,11 @@ def _search_movies_by_page(kw):
 
 def _get_movie_details(movie):
     movie.year = movie.date[0:4]
-    movie.directors = movie.director.split(' ')
-    movie.writers = movie.writer.split(' ')
-    movie.stars = movie.star.split(' ')
-    movie.styles = movie.style.split(' ')
+    req = r'[\s\,\;\/]+'
+    movie.directors = re.split(req, movie.director)
+    movie.writers = re.split(req, movie.writer)
+    movie.stars = re.split(req, movie.star)
+    movie.styles = re.split(req, movie.style)
     movie.summarys = movie.summary.split("\n")
     movie.num_directors = len(movie.directors)
     movie.num_writers = len(movie.writers)
@@ -58,6 +59,13 @@ def _get_movie_details(movie):
     movie.num_styles = len(movie.styles)
     movie.score = int(movie.score)
     return movie
+
+def get_movie_poster_by_id(movie_id):
+    movie_poster_src= 'static/images/movie_posters/' + movie_id + '.jpg'
+    with open(movie_poster_src, 'rb') as f:
+        imgData = f.read();
+    img = 'data:image/jpeg;base64,' + base64.b64encode(imgData);
+    return img
 
 def make_signed_cookie(id, password, max_age):
     # build cookie string by: id-expires-md5
@@ -142,9 +150,9 @@ def register():
 def signin():
     return dict()
 
-@view('mypath.html')
-@get('/mypath')
-def mypath():
+@view('myhistory.html')
+@get('/myhistory')
+def myhistory():
     return dict(user=ctx.request.user)
 
 @get('/signout')
@@ -182,7 +190,7 @@ def manage_movies_edit(movie_id):
     movie = Movie.get(movie_id)
     if movie is None:
         raise notfound()
-    return dict(id=movie.id, name=movie.name, duration=movie.duration, style=movie.style, date=movie.date, director=movie.director, writer=movie.writer, star=movie.star, summary=movie.summary, action='/api/movies/%s' % movie_id, redirect='/manage/movies', user=ctx.request.user)
+    return dict(id=movie.id, action='/api/movies/%s' % movie_id, redirect='/manage/movies', user=ctx.request.user)
 
 @view('manage_user_list.html')
 @get('/manage/users')
@@ -239,7 +247,7 @@ def api_get_movies():
     format = ctx.request.get('format', '')
     movies, page = _get_movies_by_page()
     for movie in movies:
-        movie.directors = movie.director.split(' ')
+        movie.directors = re.split(r'[\s\,\;\/]+', movie.director)
     if format=='html':
         for movie in movies:
             movie.content = markdown2.markdown(movie.content)
@@ -250,6 +258,7 @@ def api_get_movies():
 def api_get_movie(movie_id):
     movie = Movie.get(movie_id)
     if movie:
+        movie.img = get_movie_poster_by_id(movie_id)
         return movie
     raise APIResourceNotFoundError('movie')
 
@@ -270,12 +279,13 @@ def api_get_histories(user_id):
     movies = []
     if histories:
         for history in histories:
+            dt = datetime.fromtimestamp(history.created_at)
             movie_id = history.movie_id
             movie = Movie.get(movie_id)
-            movie = _get_movie_details(movie)
-            dt = datetime.fromtimestamp(history.created_at)
-            movie.history_day = dt.day
-            movie.history_month = dt.month
+            if movie:
+                movie = _get_movie_details(movie)
+                movie.history_day = dt.day
+                movie.history_month = dt.month
             movies.append(movie)
         return dict(movies=movies)
     raise APIResourceNotFoundError('histories')
@@ -310,7 +320,7 @@ def register_user():
 @post('/api/movies')
 def api_create_movie():
     check_admin()
-    i = ctx.request.input(name='', duration='', style='', date='', director='', writer='', star='', summary='')
+    i = ctx.request.input(name='', duration='', style='', date='', director='', writer='', star='', summary='', img='')
     name = i.name.strip()
     duration = i.duration.strip()
     style = i.style.strip()
@@ -319,6 +329,7 @@ def api_create_movie():
     writer = i.writer.strip()
     star = i.star.strip()
     summary = i.summary.strip()
+    img = i.img
     if not name:
         raise APIValueError('name', 'name cannot be empty.')
     if not duration:
@@ -335,15 +346,22 @@ def api_create_movie():
         raise APIValueError('star', 'star cannot be empty.')
     if not summary:
         raise APIValueError('summary', 'summary cannot be empty.')
+    if not img:
+        raise APIValueError('img', 'img cannot be empty.')
     movie = Movie(name=name, duration=duration, style=style, date=date, director=director, writer=writer, star=star, summary=summary)
     movie.insert()
+    movie_poster_src= 'static/images/movie_posters/' + movie.id + '.jpg'
+    img = img[img.index(';base64,')+8:]
+    imgData = base64.b64decode(img);
+    with open(movie_poster_src, 'wb') as f:
+        f.write(imgData)
     return movie
 
 @api
 @post('/api/movies/:movie_id')
 def api_update_movie(movie_id):
     check_admin()
-    i = ctx.request.input(name='', duration='', style='', date='', director='', writer='', star='', summary='')
+    i = ctx.request.input(name='', duration='', style='', date='', director='', writer='', star='', summary='', img='')
     name = i.name.strip()
     duration = i.duration.strip()
     style = i.style.strip()
@@ -352,6 +370,7 @@ def api_update_movie(movie_id):
     writer = i.writer.strip()
     star = i.star.strip()
     summary = i.summary.strip()
+    img = i.img
     if not name:
         raise APIValueError('name', 'name cannot be empty.')
     if not duration:
@@ -368,6 +387,8 @@ def api_update_movie(movie_id):
         raise APIValueError('star', 'star cannot be empty.')
     if not summary:
         raise APIValueError('summary', 'summary cannot be empty.')
+    if not img:
+        raise APIValueError('img', 'img cannot be empty.')
     movie = Movie.get(movie_id)
     if movie is None:
         raise APIResourceNotFoundError('movie')
@@ -380,6 +401,11 @@ def api_update_movie(movie_id):
     movie.star = star
     movie.summary = summary
     movie.update()
+    movie_poster_src= 'static/images/movie_posters/' + movie_id + '.jpg'
+    img = img[img.index(';base64,')+8:]
+    imgData = base64.b64decode(img);
+    with open(movie_poster_src, 'wb') as f:
+        f.write(imgData)
     return movie
 
 @api
