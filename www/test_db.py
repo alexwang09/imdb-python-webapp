@@ -9,12 +9,17 @@ from transwarp import db
 
 import time, uuid
 if __name__ == '__main__':
-    #print Movie().__sql__()
+    print User().__sql__()
+    print Movie().__sql__()
+    print Review().__sql__()
+    print History().__sql__()
+
+    '''
     db.create_engine('root', 'wxy6772102', 'imdb')
 
     db.update('drop table if exists histories')
     db.update(History().__sql__())
-    '''
+
     id = '0014781867782440246055d8b314bb1be953e2843a5af0a000'
     m = Movie.get(id)
 
