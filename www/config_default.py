@@ -11,7 +11,7 @@ Default configurations.
 configs = {
     'db': {
         'user': 'root',
-        'password': 'wxy6772102',
+        'password': '6772102',
         'database': 'imdb',
         'host': '127.0.0.1',
         'port': 3306,
