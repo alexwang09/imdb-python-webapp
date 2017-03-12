@@ -38,6 +38,7 @@ img {
     border-color: #E6E6E6;
     border-radius:25px;
     padding: 10px 20px 10px 0px;
+    margin-top: 20px;
 }
 
 .movie {
@@ -93,6 +94,10 @@ img {
 
 #fliter .clickClass a {
     color: white;
+}
+
+.history-panel {
+    margin-top: 20px;
 }
 
 .history-movie {
