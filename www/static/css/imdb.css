@@ -21,6 +21,10 @@ img {
     margin-top: 10px;
 }
 
+.uk-navbar {
+    z-index: 1;
+}
+
 .subtitle {
     margin: 0px 0px 8px 0px;
 }

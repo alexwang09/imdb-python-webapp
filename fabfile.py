@@ -12,12 +12,12 @@ import os, re
 from datetime import datetime
 from fabric.api import *
 
-env.user = 'alexwang'
+env.user = 'ubuntu'
 env.sudo_user = 'root'
-env.hosts = ['192.168.3.10']
+env.hosts = ['115.159.71.93']
 
 db_user = 'root'
-db_password = 'wxy6772102'
+db_password = '6772102'
 
 _TAR_FILE = 'dist-awesome.tar.gz'
 
@@ -77,8 +77,8 @@ def deploy():
     with cd(_REMOTE_BASE_DIR):
         sudo('rm -r www')
         sudo('ln -s %s www' % newdir)
-        sudo('chown alexwang:alexwang www')
-        sudo('chown -R alexwang:alexwang %s' % newdir)
+        sudo('chown ubuntu:ubuntu www')
+        sudo('chown -R ubuntu:ubuntu %s' % newdir)
     # 重启Python服务和nginx服务器:
     with settings(warn_only=True):
         sudo('supervisorctl stop awesome')
@@ -127,7 +127,7 @@ def rollback():
         print ('Start rollback...')
         sudo('rm -f www')
         sudo('ln -s %s www' % old)
-        sudo('chown alexwang:alexwang www')
+        sudo('chown ubuntu:ubuntu www')
         with settings(warn_only=True):
             sudo('supervisorctl stop awesome')
             sudo('supervisorctl start awesome')
